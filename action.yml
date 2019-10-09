@@ -1,0 +1,15 @@
+name: 'Key Vault Get Secret'
+description: 'Get Secrets from Azure Key Vault instance. https://github.com/azure/actions'
+inputs:
+  keyvault:
+    description: 'Name of the azure key vault'
+    required: true
+  secrets:
+    description: 'Name of the secret to be fetched'
+    required: true
+branding:
+  icon: 'akv.svg'
+  color: 'blue'
+runs:
+  using: 'node12'
+  main: 'lib/main.js'
