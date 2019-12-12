@@ -1,6 +1,6 @@
 # GitHub Action to fetch secrets from azure key vault
 
-With the Get KeyVault Secrets action, you can consume the secrets in your azure keyvaults as part of your github actions workflow.
+With the Get KeyVault Secrets action, you can consume the secrets from your azure keyvaults in your github actions workflow.
 
 Get started today with a [free Azure account](https://azure.com/free/open-source)!
 
@@ -33,7 +33,7 @@ jobs:
     - uses: actions/get-keyvault-secrets
       with:
         keyvault: "myKeyVault"
-        secrets: '*'
+        secrets: 'mySecret'
       id: myGetSecretAction
         
 ```
