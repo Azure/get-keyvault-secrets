@@ -75,6 +75,39 @@ az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn <YOUR SPN
 ```
 [KeyVault Set-Policy](https://docs.microsoft.com/en-us/cli/azure/keyvault?view=azure-cli-latest#az-keyvault-set-policy)
 
+### Using the keyvault action in your workflow
+Take a look at the following workflow which leverages the keyvault action to fetch a secret from the keyvault and uses it as the password for the docker login action. This 
+
+```
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # checkout the repo
+    - uses: actions/checkout@master
+    - uses: azure/actions/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }} # Define secret variable in repository settings as per action documentation
+    - uses: actions/get-keyvault-secrets
+      with:
+        keyvault: "myKeyVault"
+        secrets: 'mySecret'
+      id: myGetSecretAction
+    - uses: azure/docker-login@v1
+      with:
+        login-server: mycontainer.azurecr.io
+        username: 'username'
+        password: ${{ steps.myGetSecretAction.outputs.mySecret }}
+    - run: |
+        cd go-sample
+        docker build . -t my.azurecr.io/myimage:${{ github.sha }}
+        docker push my.azurecr.io/myimage:${{ github.sha }}
+        cd ..
+ 
+ ```
+
 # Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
