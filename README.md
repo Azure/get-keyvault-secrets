@@ -68,6 +68,12 @@ Follow the steps to configure the secret:
 ```
   * Now in the workflow file in your branch: `.github/workflows/workflow.yml` replace the secret in Azure login action with your secret (Refer to the example above)
 
+### Other points to note
+You will need to provide explicit access policies for your keyvault to be accessed for get and list operations. Use below command for that:
+```
+az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn <YOUR SPN CLIENT ID>
+```
+[KeyVault Set-Policy](https://docs.microsoft.com/en-us/cli/azure/keyvault?view=azure-cli-latest#az-keyvault-set-policy)
 
 # Contributing
 
