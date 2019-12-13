@@ -72,7 +72,7 @@ az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn <clientId
 For more details, refer to [KeyVault Set-Policy](https://docs.microsoft.com/en-us/cli/azure/keyvault?view=azure-cli-latest#az-keyvault-set-policy).
 
 ### Consuming secrets fetched using the keyvault action in your workflow
-Sample workflow which leverages the keyvault action to fetch a secret from the keyvault and uses it as the password for the docker login action.  
+Sample workflow which leverages the keyvault action to fetch multiple secrets from the keyvault and use them as credentials for the docker login action.  
 
 ```
 on: [push]
