@@ -1,17 +1,20 @@
 # GitHub Action to fetch secrets from azure key vault
 
-With the Get KeyVault Secrets action, you can consume the secrets from your azure keyvaults in your github actions workflow.
+With the Get KeyVault Secrets action, you can fetch secrets from an [Azure keyvault](https://docs.microsoft.com/en-us/rest/api/keyvault/about-keys--secrets-and-certificates) instance and consume in your GitHub Action workflows.
 
 Get started today with a [free Azure account](https://azure.com/free/open-source)!
 
+The definition of this GitHub Action is in [action.yml](https://github.com/Azure/get-keyvault-secrets/blob/master/action.yml).
 
-The definition of this Github Action is in [action.yml](https://github.com/Azure/webapps-deploy/blob/master/action.yml).
+Secrets fetched will be set as outputs of the keyvault action instance and can be consumed in the subsequent actions in the workflow using the notation: ${{ steps.<Id of the KeyVault Action>.outputs.<Secret Key> }}. In addition, secrets are also set as environment variables. All the variables are automatically masked if printed to the console or to logs.
+
+Refer to more [Actions for Azure](https://github.com/Azure/actions) and [Starter templates](https://github.com/Azure/actions-workflow-samples) to easily automate your CICD workflows targeting Azure services using GitHub Action workflows.
 
 # End-to-End Sample Workflows
 
 ## Dependencies on other Github Actions
 
-* Authenticate using [Azure Login](https://github.com/Azure/login)
+* Authenticate using [Azure Login](https://github.com/Azure/login) with an Azure service principal, which also has Get, List permissions on the keyvault under consideration.
   
 ### Sample workflow to build and deploy a Node.js Web app to Azure using publish profile
 
@@ -27,34 +30,28 @@ jobs:
     steps:
       # checkout the repo
     - uses: actions/checkout@master
-    - uses: azure/actions/login@v1
+    - uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }} # Define secret variable in repository settings as per action documentation
+        creds: ${{ secrets.AZURE_CREDENTIALS }} 
     - uses: actions/get-keyvault-secrets
       with:
         keyvault: "myKeyVault"
-        secrets: 'mySecret'
+        secrets: 'mySecret'  # comma separated list of secret keys that need to be fetched from the keyvault 
       id: myGetSecretAction
         
 ```
 
-#### Configure deployment credentials:
+## Configure Azure credentials:
 
-For any credentials like Azure Service Principal, Publish Profile etc add them as [secrets](https://help.github.com/en/articles/virtual-environments-for-github-actions#creating-and-using-secrets-encrypted-variables) in the GitHub repository and then use them in the workflow.
+To fetch the credentials required to authenticate with Azure, run the following command to generate an Azure Service Principal (SPN) with Contributor permissions:
 
-The above example uses user-level credentials i.e., Azure Service Principal for deployment. 
-
-Follow the steps to configure the secret:
-  * Define a new secret under your repository settings, Add secret menu
-  * Paste the contents of the below [az cli](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest) command as the value of secret variable, for example 'AZURE_CREDENTIALS'
-```bash  
-
-   az ad sp create-for-rbac --name "myApp" --role contributor \
+```sh
+az ad sp create-for-rbac --name "myApp" --role contributor \
                             --scopes /subscriptions/{subscription-id}/resourceGroups/{resource-group} \
                             --sdk-auth
                             
-  # Replace {subscription-id}, {resource-group} with the subscription, resource group details of the WebApp
-  
+  # Replace {subscription-id}, {resource-group} with the subscription, resource group details of your keyvault
+
   # The command should output a JSON object similar to this:
 
   {
@@ -64,19 +61,18 @@ Follow the steps to configure the secret:
     "tenantId": "<GUID>",
     (...)
   }
-  
 ```
-  * Now in the workflow file in your branch: `.github/workflows/workflow.yml` replace the secret in Azure login action with your secret (Refer to the example above)
+Add the json output as [a secret](https://aka.ms/create-secrets-for-GitHub-workflows) (let's say with the name `AZURE_CREDENTIALS`) in the GitHub repository. 
 
-### Other points to note
-You will need to provide explicit access policies for your keyvault to be accessed for get and list operations. Use below command for that:
+### Enable permissions to access the Keyvault secrets
+Provide explicit access policies on the above Azure service principal to be able to access your keyvault for `get` and `list` operations. Use below command for that:
 ```
-az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn <YOUR SPN CLIENT ID>
+az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn <clientId from the Azure SPN JSON>
 ```
-[KeyVault Set-Policy](https://docs.microsoft.com/en-us/cli/azure/keyvault?view=azure-cli-latest#az-keyvault-set-policy)
+For more details, refer to [KeyVault Set-Policy](https://docs.microsoft.com/en-us/cli/azure/keyvault?view=azure-cli-latest#az-keyvault-set-policy).
 
-### Using the keyvault action in your workflow
-Take a look at the following workflow which leverages the keyvault action to fetch a secret from the keyvault and uses it as the password for the docker login action. This 
+### Consuming secrets fetched using the keyvault action in your workflow
+Sample workflow which leverages the keyvault action to fetch a secret from the keyvault and uses it as the password for the docker login action.  
 
 ```
 on: [push]
@@ -93,13 +89,13 @@ jobs:
     - uses: actions/get-keyvault-secrets
       with:
         keyvault: "myKeyVault"
-        secrets: 'mySecret'
+        secrets: 'mySecret1, mySecret2'
       id: myGetSecretAction
     - uses: azure/docker-login@v1
       with:
         login-server: mycontainer.azurecr.io
-        username: 'username'
-        password: ${{ steps.myGetSecretAction.outputs.mySecret }}
+        username: ${{ steps.myGetSecretAction.outputs.mySecret1 }}
+        password: ${{ steps.myGetSecretAction.outputs.mySecret2 }}
     - run: |
         cd go-sample
         docker build . -t my.azurecr.io/myimage:${{ github.sha }}
