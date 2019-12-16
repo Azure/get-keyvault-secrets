@@ -1,11 +1,11 @@
-name: 'Key Vault Get Secret'
-description: 'Get Secrets from Azure Key Vault instance. https://github.com/azure/actions'
+name: 'Azure key vault - Get Secrets'
+description: 'Get Secrets from Azure Key Vault instance and set as output variables. github.com/azure/actions'
 inputs:
   keyvault:
     description: 'Name of the azure key vault'
     required: true
   secrets:
-    description: 'Name of the secret to be fetched'
+    description: 'Name of the secret to be fetched' #Comma separated list of secret keys can be specified
     required: true
 branding:
   icon: 'akv.svg'
