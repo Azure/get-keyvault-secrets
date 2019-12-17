@@ -14,12 +14,19 @@ async function run() {
         core.exportVariable('AZURE_HTTP_USER_AGENT', userAgentString);
 
         var actionParameters = new KeyVaultActionParameters().getKeyVaultActionParameters();
-        let handler: IAuthorizationHandler = await getHandler();
+        let handler: IAuthorizationHandler = null;
 
-        var keyVaultHelper = new KeyVaultHelper(handler, 100, actionParameters);
-        console.log("Downloading secrets");
-        keyVaultHelper.downloadSecrets();
-        
+        try {
+            handler = await getHandler();
+        }
+        catch (error) {
+            core.setFailed("Could not login to Azure.")
+        }
+
+        if (handler != null) {
+            var keyVaultHelper = new KeyVaultHelper(handler, 100, actionParameters);
+            keyVaultHelper.downloadSecrets();
+        }        
     } catch (error) {
         core.debug("Get secret failed with error: " + error);
         core.setFailed(!!error.message ? error.message : "Error occurred in fetching the secrets.");
