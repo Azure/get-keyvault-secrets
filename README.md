@@ -1,6 +1,6 @@
-# GitHub Action to fetch secrets from azure key vault
+# GitHub Action to fetch secrets from Azure Key Vault
 
-With the Get KeyVault Secrets action, you can fetch secrets from an [Azure keyvault](https://docs.microsoft.com/en-us/rest/api/keyvault/about-keys--secrets-and-certificates) instance and consume in your GitHub Action workflows.
+With the Get Key Vault Secrets action, you can fetch secrets from an [Azure Key Vault](https://docs.microsoft.com/en-us/rest/api/keyvault/about-keys--secrets-and-certificates) instance and consume in your GitHub Action workflows.
 
 Get started today with a [free Azure account](https://azure.com/free/open-source)!
 
@@ -35,8 +35,9 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }} 
     - uses: actions/get-keyvault-secrets
       with:
-        keyvault: "myKeyVault"
-        secrets: 'mySecret'  # comma separated list of secret keys that need to be fetched from the keyvault 
+        keyvault: "my
+        Vault"
+        secrets: 'mySecret'  # comma separated list of secret keys that need to be fetched from the Key Vault 
       id: myGetSecretAction
         
 ```
@@ -64,15 +65,15 @@ az ad sp create-for-rbac --name "myApp" --role contributor \
 ```
 Add the json output as [a secret](https://aka.ms/create-secrets-for-GitHub-workflows) (let's say with the name `AZURE_CREDENTIALS`) in the GitHub repository. 
 
-### Enable permissions to access the Keyvault secrets
-Provide explicit access policies on the above Azure service principal to be able to access your keyvault for `get` and `list` operations. Use below command for that:
+### Enable permissions to access the Key Vault secrets
+Provide explicit access policies on the above Azure service principal to be able to access your Key Vault for `get` and `list` operations. Use below command for that:
 ```
 az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn <clientId from the Azure SPN JSON>
 ```
 For more details, refer to [KeyVault Set-Policy](https://docs.microsoft.com/en-us/cli/azure/keyvault?view=azure-cli-latest#az-keyvault-set-policy).
 
 ### Consuming secrets fetched using the keyvault action in your workflow
-Sample workflow which leverages the keyvault action to fetch multiple secrets from the keyvault and use them as credentials for the docker login action.  
+Sample workflow which leverages the Key Vault action to fetch multiple secrets from the Key Vault and use them as credentials for the docker login action.  
 
 ```
 on: [push]
