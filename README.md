@@ -35,8 +35,9 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }} 
     - uses: actions/get-keyvault-secrets
       with:
-        keyvault: "myKeyVault"
-        secrets: 'mySecret'  # comma separated list of secret keys that need to be fetched from the keyvault 
+        keyvault: "my
+        Vault"
+        secrets: 'mySecret'  # comma separated list of secret keys that need to be fetched from the Key Vault 
       id: myGetSecretAction
         
 ```
