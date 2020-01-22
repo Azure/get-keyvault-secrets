@@ -30,10 +30,10 @@ jobs:
     steps:
       # checkout the repo
     - uses: actions/checkout@master
-    - uses: azure/login@v1
+    - uses: Azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }} 
-    - uses: actions/get-keyvault-secrets
+    - uses: Azure/get-keyvault-secrets@v1.0
       with:
         keyvault: "my
         Vault"
@@ -75,7 +75,7 @@ For more details, refer to [KeyVault Set-Policy](https://docs.microsoft.com/en-u
 ### Consuming secrets fetched using the keyvault action in your workflow
 Sample workflow which leverages the Key Vault action to fetch multiple secrets from the Key Vault and use them as credentials for the docker login action.  
 
-```
+```yaml
 on: [push]
 
 jobs:
@@ -84,15 +84,15 @@ jobs:
     steps:
       # checkout the repo
     - uses: actions/checkout@master
-    - uses: azure/actions/login@v1
+    - uses: Azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }} # Define secret variable in repository settings as per action documentation
-    - uses: actions/get-keyvault-secrets
+    - uses: Azure/get-keyvault-secrets@v1.0
       with:
         keyvault: "myKeyVault"
         secrets: 'mySecret1, mySecret2'
       id: myGetSecretAction
-    - uses: azure/docker-login@v1
+    - uses: Azure/docker-login@v1
       with:
         login-server: mycontainer.azurecr.io
         username: ${{ steps.myGetSecretAction.outputs.mySecret1 }}
