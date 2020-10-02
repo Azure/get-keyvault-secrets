@@ -7,6 +7,10 @@ inputs:
   secrets:
     description: 'Name of the secret to be fetched' #Comma separated list of secret keys can be specified
     required: true
+  environment:
+    description: 'Name of the environment. Supported values are AzureStack, AzureCloud. Default being AzureCloud'
+    required: false
+    default: AzureCloud
 branding:
   icon: 'akv.svg'
   color: 'blue'

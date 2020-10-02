@@ -24,7 +24,11 @@ async function run() {
 
         if (handler != null) {
             var actionParameters = new KeyVaultActionParameters().getKeyVaultActionParameters(handler);
-            var keyVaultHelper = new KeyVaultHelper(handler, 100, actionParameters);            
+            var keyVaultHelper = new KeyVaultHelper(handler, 100, actionParameters);  
+            if (actionParameters.environment.toLowerCase() == "azurestack") {
+                console.log('Running keyvault action against AzureStack')
+                await keyVaultHelper.initKeyVaultClient();
+            }      
             keyVaultHelper.downloadSecrets();
         }        
     } catch (error) {
