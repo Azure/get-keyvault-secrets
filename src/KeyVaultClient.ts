@@ -4,19 +4,17 @@ import { AzureKeyVaultSecret } from "./KeyVaultHelper";
 import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
 import { WebRequest, WebResponse } from 'azure-actions-webclient/WebClient';
 import { ServiceClient as AzureRestClient, ToError, AzureError, ApiCallback, ApiResult } from 'azure-actions-webclient/AzureRestClient'
-import { KeyVaultActionParameters } from './KeyVaultActionParameters';
 
-export class KeyVaultClient extends ServiceClient {    
-    private keyVaultActionParameters: KeyVaultActionParameters;
+export class KeyVaultClient extends AzureRestClient {    
+    private keyVaultUrl: string;
     private apiVersion: string = "7.0";
     private tokenArgs: string[] = ["--resource", "https://vault.azure.net"];
     private authHandler: IAuthorizer;
     
-
-    constructor(endpoint: IAuthorizer, timeOut: number, keyVaultActionParameters: KeyVaultActionParameters) {
+    constructor(endpoint: IAuthorizer, timeOut: number, keyVaultUrl: string) {
         super(endpoint, timeOut);
         this.authHandler = endpoint;
-        this.keyVaultActionParameters = keyVaultActionParameters;
+        this.keyVaultUrl = keyVaultUrl;
         var keyvaultDns = endpoint.getCloudSuffixUrl("keyvaultDns").substring(1);
         this.tokenArgs[1] = "https://" + keyvaultDns;
     }
@@ -26,10 +24,6 @@ export class KeyVaultClient extends ServiceClient {
         if (resourceManagerEndpointUrl.endsWith('/')) {
             resourceManagerEndpointUrl = resourceManagerEndpointUrl.substring(0, resourceManagerEndpointUrl.length-1); // need to remove trailing / from resourceManagerEndpointUrl to correctly derive suffix below
         }
-        var keyVaultDnsSuffix = "vault" + resourceManagerEndpointUrl.substring(resourceManagerEndpointUrl.indexOf('.'));
-        this.keyVaultActionParameters.keyVaultUrl = util.format("https://%s.%s", this.keyVaultActionParameters.keyVaultName, keyVaultDnsSuffix);
-        console.log(`keyVaultUrl - "${this.keyVaultActionParameters.keyVaultUrl}"`);
-
         // Create HTTP transport objects
         var httpRequest: WebRequest = {
             method: 'GET',
@@ -38,10 +32,11 @@ export class KeyVaultClient extends ServiceClient {
         };
         this.tokenArgs = null;
         var armresponse = await this.invokeRequest(httpRequest);
-        console.log(`armresponse: "${util.inspect(armresponse, {depth: null})}"`);
+        core.debug(`armresponse: "${util.inspect(armresponse, {depth: null})}"`);
         var audience = armresponse.body.authentication.audiences[0];
         var kvResourceId = audience.replace("management","vault");
-        console.log(`audience: "${audience}", kvResourceId: "${kvResourceId}"`);
+        core.debug(`audience: "${audience}", kvResourceId: "${kvResourceId}"`);
+        core.debug(`keyVaultUrl - "${this.keyVaultUrl}"`);
         this.tokenArgs = ["--resource", kvResourceId];
         this.apiVersion = "2016-10-01";
         await this.authHandler.getToken(true, this.tokenArgs);
@@ -67,7 +62,7 @@ export class KeyVaultClient extends ServiceClient {
         if (!url)
         {
             url = this.getRequestUriForbaseUrl(
-                this.keyVaultActionParameters.keyVaultUrl,
+                this.keyVaultUrl,
                 '/secrets',
                 {},
                 ['maxresults=25'],
@@ -122,7 +117,7 @@ export class KeyVaultClient extends ServiceClient {
             method: 'GET',
             headers: {},
             uri: this.getRequestUriForbaseUrl(
-                this.keyVaultActionParameters.keyVaultUrl,
+                this.keyVaultUrl,
                 '/secrets/{secretName}',
                 {
                     '{secretName}': secretName

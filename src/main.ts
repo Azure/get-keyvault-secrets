@@ -4,7 +4,10 @@ import { AuthorizerFactory } from 'azure-actions-webclient/AuthorizerFactory';
 import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
 import { KeyVaultActionParameters } from './KeyVaultActionParameters';
 import { KeyVaultHelper } from './KeyVaultHelper';
+import * as exec from '@actions/exec';
+import * as io from '@actions/io';
 
+var azPath: string;
 var prefix = !!process.env.AZURE_HTTP_USER_AGENT ? `${process.env.AZURE_HTTP_USER_AGENT}` : "";
 async function run() {
     try {
@@ -25,10 +28,13 @@ async function run() {
         if (handler != null) {
             var actionParameters = new KeyVaultActionParameters().getKeyVaultActionParameters(handler);
             var keyVaultHelper = new KeyVaultHelper(handler, 100, actionParameters);  
-            if (actionParameters.environment.toLowerCase() == "azurestack") {
-                console.log('Running keyvault action against AzureStack')
+            azPath = await io.which("az", true);
+            var environment = await executeAzCliCommand("cloud show --query name");
+            environment = environment.replace(/"|\s/g, '');
+            console.log('Running keyvault action against ' + environment);
+            if (environment.toLowerCase() == "azurestack") {
                 await keyVaultHelper.initKeyVaultClient();
-            }      
+            }    
             keyVaultHelper.downloadSecrets();
         }        
     } catch (error) {
@@ -38,6 +44,24 @@ async function run() {
     finally {
         core.exportVariable('AZURE_HTTP_USER_AGENT', prefix);
     }
+}
+
+async function executeAzCliCommand(command: string) {
+    let stdout = '';
+    let stderr = '';
+    try {
+        core.debug(`"${azPath}" ${command}`);
+        await exec.exec(`"${azPath}" ${command}`, [], {
+            silent: true, // this will prevent priniting access token to console output
+            listeners: {
+                stdout: (data: Buffer) => { stdout += data.toString(); },
+                stderr: (data: Buffer) => { stderr += data.toString(); }
+            }
+        });
+    } catch (error) {
+        throw new Error(stderr);
+    }
+    return stdout;
 }
 
 run();

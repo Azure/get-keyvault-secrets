@@ -18,7 +18,7 @@ export class KeyVaultHelper {
 
     constructor(handler: IAuthorizer, timeOut: number, keyVaultActionParameters: KeyVaultActionParameters) {
         this.keyVaultActionParameters = keyVaultActionParameters;
-        this.keyVaultClient = new KeyVaultClient(handler, timeOut, keyVaultActionParameters);
+        this.keyVaultClient = new KeyVaultClient(handler, timeOut, keyVaultActionParameters.keyVaultUrl);
     }
 
     public async initKeyVaultClient(){
