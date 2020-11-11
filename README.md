@@ -35,9 +35,11 @@ jobs:
       - uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: "my Vault"
-          secrets: "mySecret" # comma separated list of secret keys that need to be fetched from the Key Vault
+          secrets: "mySecret" # comma separated list of secret keys that need to be fetched from the Key Vault, or "*" to fetch all secrets.
         id: myGetSecretAction
 ```
+
+Please note that while you can specify `"*"` as the values for the secrets list, this is generally not recommended due to the risk of exposing secrets you did not intend to processes running in your build environment.
 
 ### Configure Azure credentials
 

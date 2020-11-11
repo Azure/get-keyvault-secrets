@@ -5,7 +5,7 @@ inputs:
     description: 'Name of the azure key vault'
     required: true
   secrets:
-    description: 'Name of the secret to be fetched' #Comma separated list of secret keys can be specified
+    description: 'Name of the secret to be fetched' # Comma separated list of secret keys can be specified, specify "*" to fetch all keys.
     required: true
 branding:
   icon: 'akv.svg'
