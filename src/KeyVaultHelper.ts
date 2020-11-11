@@ -109,7 +109,7 @@ export class KeyVaultHelper {
         }
 
         core.setSecret(secretValue);
-        core.exportVariable(secretName, secretValue);
+        core.exportVariable(secretName.toUpperCase().replace(/-/g, "_"), secretValue);
         core.setOutput(secretName, secretValue);
     }
 
