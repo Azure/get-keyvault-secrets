@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@actions/core": "1.2.6",
-    "azure-actions-webclient": "1.0.1"
+    "azure-actions-webclient": "1.1.0"
   },
   "repository": {
     "type": "git",

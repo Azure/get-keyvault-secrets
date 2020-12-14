@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { IAuthorizationHandler } from "azure-actions-webclient/lib/AuthHandler/IAuthorizationHandler";
+import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
 import { KeyVaultActionParameters } from "./KeyVaultActionParameters";
 import { KeyVaultClient } from "./KeyVaultClient";
 import util = require("util");
@@ -16,7 +16,7 @@ export class KeyVaultHelper {
     private keyVaultActionParameters: KeyVaultActionParameters;
     private keyVaultClient: KeyVaultClient;
 
-    constructor(handler: IAuthorizationHandler, timeOut: number, keyVaultActionParameters: KeyVaultActionParameters) {
+    constructor(handler: IAuthorizer, timeOut: number, keyVaultActionParameters: KeyVaultActionParameters) {
         this.keyVaultActionParameters = keyVaultActionParameters;
         this.keyVaultClient = new KeyVaultClient(handler, timeOut, keyVaultActionParameters.keyVaultUrl);
     }
