@@ -1,5 +1,6 @@
 import util = require("util");
 import * as core from '@actions/core';
+import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
 
 export class KeyVaultActionParameters {
 
@@ -7,7 +8,7 @@ export class KeyVaultActionParameters {
     public secretsFilter: string;
     public keyVaultUrl: string;
 
-    public getKeyVaultActionParameters() : KeyVaultActionParameters {
+    public getKeyVaultActionParameters(handler: IAuthorizer) : KeyVaultActionParameters {
         this.keyVaultName = core.getInput("keyvault");
         this.secretsFilter = core.getInput("secrets");
 
@@ -19,7 +20,7 @@ export class KeyVaultActionParameters {
             core.setFailed("Secret filter not provided.");
         }
 
-        var azureKeyVaultDnsSuffix = "vault.azure.net";
+        var azureKeyVaultDnsSuffix = handler.getCloudSuffixUrl("keyvaultDns").substring(1);
         this.keyVaultUrl = util.format("https://%s.%s", this.keyVaultName, azureKeyVaultDnsSuffix);
         return this;
     }

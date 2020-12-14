@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as crypto from "crypto";
-import { getHandler } from 'azure-actions-webclient/lib/AuthorizationHandlerFactory';
-import { IAuthorizationHandler } from 'azure-actions-webclient/lib/AuthHandler/IAuthorizationHandler';
+import { AuthorizerFactory } from 'azure-actions-webclient/AuthorizerFactory';
+import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
 import { KeyVaultActionParameters } from './KeyVaultActionParameters';
 import { KeyVaultHelper } from './KeyVaultHelper';
 
@@ -13,18 +13,18 @@ async function run() {
         let userAgentString = (!!prefix ? `${prefix}+` : '') + `GITHUBACTIONS_${actionName}_${usrAgentRepo}`;
         core.exportVariable('AZURE_HTTP_USER_AGENT', userAgentString);
 
-        var actionParameters = new KeyVaultActionParameters().getKeyVaultActionParameters();
-        let handler: IAuthorizationHandler = null;
+        let handler: IAuthorizer = null;
 
         try {
-            handler = await getHandler();
+            handler = await AuthorizerFactory.getAuthorizer();
         }
         catch (error) {
             core.setFailed("Could not login to Azure.")
         }
 
         if (handler != null) {
-            var keyVaultHelper = new KeyVaultHelper(handler, 100, actionParameters);
+            var actionParameters = new KeyVaultActionParameters().getKeyVaultActionParameters(handler);
+            var keyVaultHelper = new KeyVaultHelper(handler, 100, actionParameters);            
             keyVaultHelper.downloadSecrets();
         }        
     } catch (error) {
