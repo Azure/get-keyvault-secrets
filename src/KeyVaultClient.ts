@@ -1,18 +1,20 @@
 import * as core from '@actions/core';
 import util = require("util");
-import { IAuthorizationHandler } from "azure-actions-webclient/lib/AuthHandler/IAuthorizationHandler";
-import { ApiResult, ServiceClient, ApiCallback, ToError } from "azure-actions-webclient/lib/AzureRestClient";
-import { WebRequest, WebResponse } from "azure-actions-webclient/lib/webClient"
 import { AzureKeyVaultSecret } from "./KeyVaultHelper";
+import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
+import { WebRequest, WebResponse } from 'azure-actions-webclient/WebClient';
+import { ServiceClient as AzureRestClient, ToError, AzureError, ApiCallback, ApiResult } from 'azure-actions-webclient/AzureRestClient'
 
-export class KeyVaultClient extends ServiceClient {    
+export class KeyVaultClient extends AzureRestClient {    
     private keyVaultUrl: string;
     private apiVersion: string = "7.0";
     private tokenArgs: string[] = ["--resource", "https://vault.azure.net"];
     
-    constructor(endpoint: IAuthorizationHandler, timeOut: number, keyVaultUrl: string) {
+    constructor(endpoint: IAuthorizer, timeOut: number, keyVaultUrl: string) {
         super(endpoint, timeOut);
         this.keyVaultUrl = keyVaultUrl;
+        var keyvaultDns = endpoint.getCloudSuffixUrl("keyvaultDns").substring(1);
+        this.tokenArgs[1] = "https://" + keyvaultDns;
     }
 
     public async invokeRequest(request: WebRequest): Promise<WebResponse> {
