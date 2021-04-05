@@ -9,12 +9,37 @@ export class KeyVaultClient extends AzureRestClient {
     private keyVaultUrl: string;
     private apiVersion: string = "7.0";
     private tokenArgs: string[] = ["--resource", "https://vault.azure.net"];
+    private authHandler: IAuthorizer;
     
     constructor(endpoint: IAuthorizer, timeOut: number, keyVaultUrl: string) {
         super(endpoint, timeOut);
+        this.authHandler = endpoint;
         this.keyVaultUrl = keyVaultUrl;
         var keyvaultDns = endpoint.getCloudSuffixUrl("keyvaultDns").substring(1);
         this.tokenArgs[1] = "https://" + keyvaultDns;
+    }
+
+    public async init() {
+        var resourceManagerEndpointUrl = this.authHandler.baseUrl;
+        if (resourceManagerEndpointUrl.endsWith('/')) {
+            resourceManagerEndpointUrl = resourceManagerEndpointUrl.substring(0, resourceManagerEndpointUrl.length-1); // need to remove trailing / from resourceManagerEndpointUrl to correctly derive suffix below
+        }
+        // Create HTTP transport objects
+        var httpRequest: WebRequest = {
+            method: 'GET',
+            headers: {},
+            uri: resourceManagerEndpointUrl + "/metadata/endpoints?api-version=2015-01-01"
+        };
+        this.tokenArgs = null;
+        var armresponse = await this.invokeRequest(httpRequest);
+        core.debug(`armresponse: "${util.inspect(armresponse, {depth: null})}"`);
+        var audience = armresponse.body.authentication.audiences[0];
+        var kvResourceId = audience.replace("management","vault");
+        core.debug(`audience: "${audience}", kvResourceId: "${kvResourceId}"`);
+        core.debug(`keyVaultUrl - "${this.keyVaultUrl}"`);
+        this.tokenArgs = ["--resource", kvResourceId];
+        this.apiVersion = "2016-10-01";
+        await this.authHandler.getToken(true, this.tokenArgs);
     }
 
     public async invokeRequest(request: WebRequest): Promise<WebResponse> {
