@@ -33,7 +33,7 @@ jobs:
     - uses: Azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }} 
-    - uses: Azure/get-keyvault-secrets@v1.0
+    - uses: Azure/get-keyvault-secrets@v1
       with:
         keyvault: "my
         Vault"
@@ -87,7 +87,7 @@ jobs:
     - uses: Azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }} # Define secret variable in repository settings as per action documentation
-    - uses: Azure/get-keyvault-secrets@v1.0
+    - uses: Azure/get-keyvault-secrets@v1
       with:
         keyvault: "myKeyVault"
         secrets: 'mySecret1, mySecret2'
