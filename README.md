@@ -1,3 +1,6 @@
+# Deprecation notice
+
+This Action is deprecated. Instead, one can use [azure/cli@v1 action](https://github.com/Azure/cli) and pass a custom script to it to access [azure key vault](https://docs.microsoft.com/en-us/azure/key-vault/secrets/quick-create-cli).
 # GitHub Action to fetch secrets from Azure Key Vault
 
 With the Get Key Vault Secrets action, you can fetch secrets from an [Azure Key Vault](https://docs.microsoft.com/en-us/rest/api/keyvault/about-keys--secrets-and-certificates) instance and consume in your GitHub Action workflows.
